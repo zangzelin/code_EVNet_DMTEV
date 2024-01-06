@@ -76,7 +76,7 @@ class LitPatNN(LightningModule):
         self.setup()
         self.wandb_logs = {}
         self.mse = torch.nn.CrossEntropyLoss()
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        # self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
         self.hparams.num_pat = min(self.data_train.data.shape[1], self.hparams.num_pat)
 
@@ -382,7 +382,7 @@ class LitPatNN(LightningModule):
         return [optimizer], [self.scheduler]
 
     def setup(self, stage=None):
-        import pdb; pdb.set_trace()
+        # import pdb; pdb.set_trace()
         dataset_f = getattr(data_base, self.dataname + "Dataset")
         self.data_train = dataset_f(
             data_name=self.hparams.data_name,
@@ -391,7 +391,7 @@ class LitPatNN(LightningModule):
         )
         if len(self.data_train.data.shape) == 2:
             self.data_train.cal_near_index(
-                device=self.device,
+                device='cuda',
                 k=self.hparams.K,
                 uselabel=bool(self.hparams.uselabel),
             )

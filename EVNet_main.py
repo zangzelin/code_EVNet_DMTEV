@@ -985,7 +985,7 @@ def main(args):
     trainer = Trainer(
         gpus=1,
         max_epochs=args.epochs,
-        progress_bar_refresh_rate=0,
+        # progress_bar_refresh_rate=0,
         # progress_bar_refresh_rate=10,
         callbacks=callbacks_list,
     )

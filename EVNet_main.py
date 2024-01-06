@@ -381,7 +381,7 @@ class LitPatNN(LightningModule):
         return [optimizer], [self.scheduler]
 
     def setup(self, stage=None):
-
+        import pdb; pdb.set_trace()
         dataset_f = getattr(data_base, self.dataname + "Dataset")
         self.data_train = dataset_f(
             data_name=self.hparams.data_name,

@@ -978,17 +978,17 @@ def main(args):
         dataname=args.data_name,
         **args.__dict__,
     )
-    early_stop = EarlyStopping(
-        monitor="es_monitor", patience=1, verbose=False, mode="max"
-    )
-    callbacks_list.append(early_stop)
+    # early_stop = EarlyStopping(
+    #     monitor="es_monitor", patience=1, verbose=False, mode="max"
+    # )
+    # callbacks_list.append(early_stop)
 
     trainer = Trainer(
         gpus=1,
         max_epochs=args.epochs,
         # progress_bar_refresh_rate=0,
         # progress_bar_refresh_rate=10,
-        callbacks=callbacks_list,
+        # callbacks=callbacks_list,
     )
     print("start fit")
     trainer.fit(model)
@@ -1166,7 +1166,7 @@ if __name__ == "__main__":
         type=int,
         default=1000,
     )
-    parser.add_argument("--epochs", type=int, default=50000)
+    parser.add_argument("--epochs", type=int, default=5000)
     parser.add_argument("--lr", type=float, default=1e-3, metavar="LR")
 
     args = pl.Trainer.add_argparse_args(parser)

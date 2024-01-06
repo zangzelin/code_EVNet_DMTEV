@@ -961,7 +961,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--data_name",
         type=str,
-        default="Digits",
+        default="Mnist",
         choices=[
             "InsEmb_PBMC",
             "OTU",

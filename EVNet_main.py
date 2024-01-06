@@ -31,10 +31,6 @@ torch.set_num_threads(2)
 def gpu2np(a):
     return a.cpu().detach().numpy()
 
-
-
-
-
 class LitPatNN(LightningModule):
     def __init__(
         self,
@@ -78,14 +74,10 @@ class LitPatNN(LightningModule):
         )
 
         if len(self.data_train.data.shape) > 2:
-            # crop_size = 32
-            # mean=(0.491, 0.482, 0.447)
-            # std=(0.247, 0.243, 0.261)
             self.transforms = transforms.AutoAugment(
                 transforms.AutoAugmentPolicy.CIFAR10
             )
 
-        # self.m = self.updata_m(init=True)
 
         self.fea_num = 1
         for i in range(len(self.data_train.data.shape) - 1):
@@ -94,11 +86,7 @@ class LitPatNN(LightningModule):
         print("fea_num", self.fea_num)
         self.PM_root = nn.Linear(self.fea_num, 1)
         self.PM_root.weight.data = torch.ones_like(self.PM_root.weight.data) / 5
-        # nn.Parameter(
-        #     torch.tensor(
-        #         torch.ones((self.fea_num)) / 5
-        #     )
-        # )
+
 
     def forward_fea(self, x):
 
@@ -115,75 +103,15 @@ class LitPatNN(LightningModule):
             lat3 = m(lat3)
         return lat1, lat1, lat3
 
-    def forward_exp(self, x):
-
-        x_ = x * ((self.PM_root.weight.reshape(-1)) * self.mask)
-        lat1 = self.model_pat(x_.float())
-        lat3 = lat1
-        for i, m in enumerate(self.model_b):
-            lat3 = m(lat3)
-        return lat1, lat1, lat3
 
     def forward(self, x):
         return self.forward_fea(x)
-
-    def forward_save(self, x):
-        return self.forward_exp(x)
 
     def predict(self, x):
         x = torch.tensor(x.to_numpy())
         return gpu2np(self.forward_simi(x))
 
-    def predict_(self, x):
-        x_b = torch.zeros((x.shape[0], self.mask.shape[0]))
-        x_b[:, self.mask > 0] = torch.tensor(x).float()
-        sim = gpu2np(self.forward_simi(x_b)).reshape(-1, 1)
-        out = np.concatenate([sim, 1 - sim], axis=1)
-        return out
 
-    def predict_lime_one_epoch(self, x):
-        x_b = torch.zeros((x.shape[0], self.mask.shape[0])).to(self.mask.device)
-        x_b[:, self.mask > 0] = torch.tensor(x).float().to(self.mask.device)
-        lat = gpu2np(self(x_b)[2])
-        predict_r = []
-        for i in range(self.cluster_centers.shape[0]):
-            predict_r.append(
-                np.exp(
-                    -1
-                    * np.linalg.norm(
-                        lat - self.cluster_centers[i], axis=1, keepdims=True
-                    )
-                )
-            )
-        predict = np.concatenate(predict_r, axis=1)
-
-        return scipy.special.softmax(predict, axis=1)
-
-    def predict_lime_g(self, x):
-
-        lat = self.forward_exp(x)[2]
-        predict_r = []
-        for i in range(self.cluster_centers.shape[0]):
-            dis = torch.norm(lat - self.cluster_centers[i], dim=1, keepdim=True)
-            # if self.aim_cluster and i == self.aim_cluster:
-            #     dis = dis * self.cluster_rescale[i]
-            predict_r.append(torch.exp(-2 * dis))
-        predict = torch.cat(predict_r, dim=1)
-
-        return torch.softmax(predict, dim=1)
-
-    def predict_lime_g_for_numpy(self, x):
-        x_base = torch.zeros(size=(x.shape[0], self.mask.shape[0]))
-        # print(type(x) == np.float32)
-        if type(x) == np.ndarray:
-            x_base[:, self.mask] = torch.tensor(x).float()
-        else:
-            x_base[:, self.mask] = x.float()
-        # x_base[:, self.mask] = x.float()
-        predict = self.predict_lime_g(x_base.to(self.device))
-        predict[:, self.aim_cluster] = predict[:, self.aim_cluster] * 0.95
-        # print(gpu2np(predict))
-        return gpu2np(predict)
 
     def forward_simi(self, x):
         x = torch.tensor(x).to(self.mask.device)
@@ -199,11 +127,6 @@ class LitPatNN(LightningModule):
         data = torch.cat([data1, data2])
         data = data.reshape(data.shape[0], -1)
 
-        # label1 = self.data_train.label[index]
-        # label2 = self.data_train.label[index]
-        # label2 = self.augmentation(index, label1)
-        # label = torch.cat([label1, label2])
-
         # forward
         pat, mid, lat = self(data)
 
@@ -216,8 +139,6 @@ class LitPatNN(LightningModule):
             # metric='cossim',
         )
 
-        # pre_dict = self.forward_classi(lat.detach())
-        # loss_mse = self.mse(pre_dict, label,)
 
         self.wandb_logs = {
             # "loss_mse": loss_mse,
@@ -319,21 +240,13 @@ class LitPatNN(LightningModule):
             else:
                 self.wandb_logs.update(
                     {
-                        # "ShowEmb": go.Figure(data=ec.ShowEmb_return_fig(
-                        #     ins_emb, self.data_train.labelstr, index)),
                         "epoch": self.current_epoch,
                         "alpha": self.alpha,
                         "metric/#link": N_link,
                         "metric/#Feature": N_Feature,
                     }
                 )
-                # wandb.log(
-                #     {
-                #         "main_easy/fig_easy": self.up_mainfig_emb(
-                #             data, ins_emb, label, index, mask=gpu2np(self.mask)
-                #         )
-                #     }
-                # )
+
             if self.hparams.save_checkpoint:
                 np.save(
                     "save_checkpoint/"

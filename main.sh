@@ -1,3 +1,3 @@
 git pull
 
-python EVNet_main.py
+CUDA_VISIBLE_DEVICES=4 python EVNet_main.py

@@ -1074,7 +1074,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--data_name",
         type=str,
-        default="InsEmb_TPD_579_ALL_PRO5C",
+        default="Digits",
         choices=[
             "InsEmb_PBMC",
             "OTU",

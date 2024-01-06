@@ -21,6 +21,7 @@ import uuid
 import eval.eval_core as ec
 import eval.eval_core_base as ecb
 import Loss.dmt_loss_aug2 as dmt_loss_aug
+import plotly.express as px
 
 # import Loss.dmt_loss_aug as dmt_loss_aug1
 import wandb
@@ -327,6 +328,9 @@ class LitPatNN(LightningModule):
                         "metric/#Feature": N_Feature,
                         "SVC_train": ecb_e_train.E_Classifacation_SVC(),  # SVC= ecb_e.E_Classifacation_SVC(),
                         "SVC_test": ecb_e_test.E_Classifacation_SVC(),  # SVC= ecb_e.E_Classifacation_SVC(),
+                        "main_easy/fig_easy": self.up_mainfig_emb(
+                            data, ins_emb, label, index, mask=gpu2np(self.mask)
+                        )
                     }
                 )
 
@@ -342,13 +346,13 @@ class LitPatNN(LightningModule):
                         "metric/#Feature": N_Feature,
                     }
                 )
-                wandb.log(
-                    {
-                        "main_easy/fig_easy": self.up_mainfig_emb(
-                            data, ins_emb, label, index, mask=gpu2np(self.mask)
-                        )
-                    }
-                )
+                # wandb.log(
+                #     {
+                #         "main_easy/fig_easy": self.up_mainfig_emb(
+                #             data, ins_emb, label, index, mask=gpu2np(self.mask)
+                #         )
+                #     }
+                # )
             if self.hparams.save_checkpoint:
                 np.save(
                     "save_checkpoint/"
@@ -537,376 +541,6 @@ class LitPatNN(LightningModule):
         dist = dist.clamp(min=1e-12)
         return dist
 
-    def up_mainfig(
-        self,
-        data,
-        ins_emb,
-        label,
-        index,
-        mask,
-        n_clusters=10,
-        num_cf_example=2,
-        explevel=3,
-    ):
-
-        if self.data_train.data.shape[0] > 20000:
-            self.rand_index = torch.randperm(self.data_train.data.shape[0])[:10000]
-        else:
-            self.rand_index = torch.tensor(
-                [i for i in range(self.data_train.data.shape[0])]
-            )
-        if self.hparams.data_name == "Digits":
-            pix = 8
-        elif self.hparams.data_name == "Mnist":
-            pix = 28
-        else:
-            pix = 0
-
-        fig = make_subplots(
-            rows=2,
-            cols=3,
-            column_widths=[0.3, 0.4, 0.3],
-            row_heights=[0.6, 0.4],
-            vertical_spacing=0.05,
-            horizontal_spacing=0.05,
-            specs=[
-                [{"type": "xy"}, {"type": "xy"}, {"type": "xy"}],
-                [{"type": "xy"}, {"type": "sankey"}, {"type": "xy"}],
-            ],
-            subplot_titles=(
-                "sample Embedding",
-                "sample-feature-pattern Embedding",
-                "Switching Embedding",
-                "Global Explainability",
-                "Local Explainability",
-                "Switching Explainability",
-            ),
-        )
-
-        # clustering
-        label_pesodu, cluster_centers = local_exp.Keams_clustering(ins_emb, n_clusters)
-        self.cluster_centers = torch.tensor(cluster_centers).to(self.mask.device)
-
-        from sklearn.preprocessing import MinMaxScaler
-
-        global_importance_raw = np.copy(gpu2np(self.PM_root.weight.reshape(-1)))
-        global_importance_raw[~gpu2np(self.mask)] = 0.1
-        global_importance = MinMaxScaler().fit_transform(
-            global_importance_raw[:, None]
-        )[:, 0]
-
-        try:
-            fea_list_all = self.data_train.feature_name
-        except BaseException:
-            print("use the index as the feature name")
-            fea_list_all = np.array(
-                ["f{}".format(i) for i in range(global_importance.shape[0])]
-            )
-        global_importance = global_importance[gpu2np(self.mask)]
-        fea_list = fea_list_all[gpu2np(self.mask)]
-
-        shap_values, fea_emb, _ = local_exp.LocalExplainability(
-            data=data,
-            model=self,
-            num_s_shap=100,
-        )
-        if explevel > 2:
-            img_from_list, cf_list = swich_exp.SwichExplainability(
-                model=self,
-                data_use=data,
-                label_pesodu=label_pesodu,
-                cluster_number=n_clusters,
-                cf_max_iterations=500,
-                pix=pix,
-            )
-
-        try:
-            label_name_list = self.data_train.label_name_list
-        except BaseException:
-            label_name_list = None
-
-        # add subfigs
-        sf1_1 = ec.Plot_subfig_1_1(ins_emb, label, index, label_name_list=label_name_list)
-        sf2_1 = ec.Plot_subfig_2_1(
-            global_importance=global_importance, fea_list=fea_list
-        )
-        sf1_2 = ec.Plot_subfig_1_2(
-            ins_emb=ins_emb,
-            label_pesodu=label_pesodu,
-            cluster_centers=cluster_centers,
-            # shap_values=shap_values,
-        )
-        sf2_2 = ec.Plot_subfig_2_2(
-            shap_values,
-            fea_list_all=fea_list_all.tolist(),
-        )
-        sf1_3 = []
-        if explevel > 2:
-            sf1_3_c01, change_dict_for_ij_list, _ = ec.Plot_subfig_1_3(
-                model=self,
-                ins_emb=ins_emb,
-                cf_list=cf_list,
-                img_from_list=img_from_list,
-                pix=pix,
-            )
-
-            sf1_3 += sf1_3_c01
-            sf2_3 = ec.Plot_subfig_2_3(
-                model=self,
-                change_dict_for_ij_list=change_dict_for_ij_list,
-                img_from_list=img_from_list,
-                cf_list=cf_list,
-                n_clusters=n_clusters,
-                fea_list_all=fea_list_all,
-            )
-            sf1_3 += sf1_2[: n_clusters + 1]
-
-        # add traces
-        fig.add_traces(sf1_1, rows=[1] * len(sf1_1), cols=[1] * len(sf1_1))
-        fig.add_traces(sf2_1, rows=[2] * len(sf2_1), cols=[1] * len(sf2_1))
-        fig.add_traces(sf1_2, rows=[1] * len(sf1_2), cols=[2] * len(sf1_2))
-        sankey_index_sart = len(fig.data)
-        fig.add_traces(sf2_2, rows=[2] * len(sf2_2), cols=[2] * len(sf2_2))
-        sankey_index_end = len(fig.data)
-        if explevel > 2:
-            flow_sart = len(fig.data) + 1
-            fig.add_traces(
-                sf1_3,
-                rows=[1] * len(sf1_3),
-                cols=[3] * len(sf1_3),
-            )
-            flow_end = flow_sart + len(sf1_3_c01) - 1
-            fig.add_traces(
-                sf2_3,
-                rows=[2] * len(sf2_3),
-                cols=[3] * len(sf2_3),
-            )
-
-            fig = ec.add_button(
-                fig, sankey_index_sart, sankey_index_end, flow_sart, flow_end, n_clusters
-            )
-
-        ec.Plot_case_study(
-            data=data,
-            mask=mask,
-            pix=pix,
-            num_s_shap=data.shape[0] // 10,
-            shap_values_abs=shap_values,
-        )
-
-        fig.update_layout(
-            height=1200,
-            width=2000,
-            showlegend=False,
-            title_text="ENV Result of {}".format(self.hparams.data_name),
-        )
-
-        fig.write_html(
-            "save_html/{}_{}_{}.html".format(
-                self.hparams.data_name, self.current_epoch, str(uuid.uuid1())
-            )
-        )
-
-        return fig
-
-    def up_mainfig_case(
-        self,
-        data,
-        ins_emb,
-        label,
-        index,
-        mask,
-        top_cluster=10,
-        n_clusters=10,
-        num_cf_example=2,
-        explevel=3,
-    ):
-
-        if self.data_train.data.shape[0] > 20000:
-            self.rand_index = torch.randperm(
-                self.data_train.data.shape[0])[:10000]
-        else:
-            self.rand_index = torch.tensor(
-                [i for i in range(self.data_train.data.shape[0])]
-            )
-        if self.hparams.data_name == "Digits":
-            pix = 8
-        elif self.hparams.data_name == "Mnist":
-            pix = 28
-        else:
-            pix = 0
-
-        fig = make_subplots(
-            rows=2,
-            cols=3,
-            column_widths=[0.3, 0.4, 0.3],
-            row_heights=[0.6, 0.4],
-            vertical_spacing=0.05,
-            horizontal_spacing=0.05,
-            specs=[
-                [{"type": "xy"}, {"type": "xy"}, {"type": "xy"}],
-                [{"type": "xy"}, {"type": "sankey"}, {"type": "xy"}],
-            ],
-            subplot_titles=(
-                "sample Embedding",
-                "sample-feature-pattern Embedding",
-                "Switching Embedding",
-                "Global Explainability",
-                "Local Explainability",
-                "Switching Explainability",
-            ),
-        )
-
-        # clustering
-        label_pesodu, cluster_centers = local_exp.Keams_clustering(ins_emb, n_clusters)
-        self.cluster_centers = torch.tensor(cluster_centers).to(self.mask.device)
-
-        from sklearn.preprocessing import MinMaxScaler
-
-        global_importance_raw = np.copy(gpu2np(self.PM_root.weight.reshape(-1)))
-        global_importance_raw[~gpu2np(self.mask)] = 0.1
-        global_importance = MinMaxScaler().fit_transform(
-            global_importance_raw[:, None]
-        )[:, 0]
-
-        try:
-            fea_list_all = self.data_train.feature_name
-        except BaseException:
-            print("use the index as the feature name")
-            fea_list_all = np.array(
-                ["f{}".format(i) for i in range(global_importance.shape[0])]
-            )
-        global_importance = global_importance[gpu2np(self.mask)]
-        fea_list = fea_list_all[gpu2np(self.mask)]
-
-        shap_values_abs, fea_emb, shap_values = local_exp.LocalExplainability(
-            data=data,
-            model=self,
-            num_s_shap=200,)
-        if explevel > 2:
-            img_from_list, cf_list = swich_exp.SwichExplainability(
-                model=self,
-                data_use=data,
-                label_pesodu=label_pesodu,
-                cluster_number=n_clusters,
-                cf_max_iterations=5,
-                cf_example_number=10,
-                pix=pix,
-                top_cluster=top_cluster,
-            )
-
-        try:
-            label_name_list = self.data_train.label_name_list
-        except BaseException:
-            label_name_list = None
-
-        # add subfigs
-        sf1_1 = ec.Plot_subfig_1_1(
-            ins_emb, label, index,
-            label_name_list=label_name_list)
-        sf2_1 = ec.Plot_subfig_2_1(
-            global_importance=global_importance, fea_list=fea_list
-        )
-        sf1_2 = ec.Plot_subfig_1_2(
-            ins_emb=ins_emb,
-            label_pesodu=label_pesodu,
-            cluster_centers=cluster_centers,
-            # shap_values=shap_values,
-        )
-        sf2_2 = ec.Plot_subfig_2_2(
-            shap_values_abs,
-            fea_list_all=fea_list_all.tolist(),
-        )
-        sf1_3 = []
-        if explevel > 2:
-            sf1_3_c01, change_dict_for_ij_list, _ = ec.Plot_subfig_1_3(
-                model=self,
-                ins_emb=ins_emb,
-                cf_list=cf_list,
-                img_from_list=img_from_list,
-                pix=pix,
-            )
-
-            sf1_3 += sf1_3_c01
-            sf2_3 = ec.Plot_subfig_2_3(
-                model=self,
-                change_dict_for_ij_list=change_dict_for_ij_list,
-                img_from_list=img_from_list,
-                cf_list=cf_list,
-                n_clusters=n_clusters,
-                fea_list_all=fea_list_all,
-            )
-            sf1_3 += sf1_2[: n_clusters + 1]
-
-        # add traces
-        fig.add_traces(sf1_1, rows=[1] * len(sf1_1), cols=[1] * len(sf1_1))
-        fig.add_traces(sf2_1, rows=[2] * len(sf2_1), cols=[1] * len(sf2_1))
-        fig.add_traces(sf1_2, rows=[1] * len(sf1_2), cols=[2] * len(sf1_2))
-        sankey_index_sart = len(fig.data)
-        fig.add_traces(sf2_2, rows=[2] * len(sf2_2), cols=[2] * len(sf2_2))
-        sankey_index_end = len(fig.data)
-        if explevel > 2:
-            flow_sart = len(fig.data) + 1
-            fig.add_traces(
-                sf1_3,
-                rows=[1] * len(sf1_3),
-                cols=[3] * len(sf1_3),
-            )
-            flow_end = flow_sart + len(sf1_3_c01) - 1
-            fig.add_traces(
-                sf2_3,
-                rows=[2] * len(sf2_3),
-                cols=[3] * len(sf2_3),
-            )
-
-            fig = ec.add_button(
-                fig, sankey_index_sart, sankey_index_end,
-                flow_sart, flow_end, n_clusters
-            )
-
-        # fig.add_traces(sf2_2, rows=[2] * len(sf2_2), cols=[2] * len(sf2_2))
-        fig_22 = go.Figure(data=sf2_2)
-        wandb.log({'fig22': fig_22})
-
-        # ec.Plot_case_study(
-        #     data=data,
-        #     mask=mask,
-        #     pix=pix,
-        #     num_s_shap=data.shape[0] // 10,
-        #     shap_values=shap_values,
-        # )
-
-        fig.update_layout(
-            height=1200,
-            width=2000,
-            showlegend=False,
-            title_text="ENV Result of {}".format(self.hparams.data_name),
-        )
-
-        fig.write_html(
-            "save_html/{}_{}_{}.html".format(
-                self.hparams.data_name, self.current_epoch, str(uuid.uuid1())
-            )
-        )
-
-        shap_values_all = []
-        for i in range(len(shap_values)):
-            shap_values_all.append(
-                shap_values[i].reshape((1, *shap_values[0].shape))
-                )
-        shap_values_all = np.concatenate(shap_values_all)
-
-        ec.Plot_case_study(
-            data, mask, pix,
-            num_s_shap=10,
-            shap_values=shap_values_all,
-            shap_values_abs=shap_values_abs,
-            label_pesodu=label_pesodu,
-            )
-        # px.imshow()
-
-        return fig
-
 
     def up_mainfig_emb(
         self, data, ins_emb,
@@ -914,7 +548,6 @@ class LitPatNN(LightningModule):
         n_clusters=10, num_cf_example=2,
     ):
         color = np.array(label)
-        import plotly.express as px
 
         fig = px.scatter(
             x=ins_emb[:, 0], y=ins_emb[:, 1], color=[str(c) for c in color]

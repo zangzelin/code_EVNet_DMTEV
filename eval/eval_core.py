@@ -2241,7 +2241,7 @@ def subfig_12_arrow_flows(
     return fig_flow, change_dict_list, np.concatenate(flow_end)
 
 
-import patemb_main
+# import patemb_main
 
 
 def Plot_subfig_1_3(model, ins_emb, cf_list, img_from_list, pix):

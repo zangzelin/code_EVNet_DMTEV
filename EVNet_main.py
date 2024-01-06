@@ -76,6 +76,7 @@ class LitPatNN(LightningModule):
         self.setup()
         self.wandb_logs = {}
         self.mse = torch.nn.CrossEntropyLoss()
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
         self.hparams.num_pat = min(self.data_train.data.shape[1], self.hparams.num_pat)
 

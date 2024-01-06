@@ -447,8 +447,8 @@ class LitPatNN(LightningModule):
                     NN_FCBNRL_MM(struc_model_b[i], struc_model_b[i + 1], use_RL=False)
                 )
 
-        print(model_pat)
-        print(model_b)
+        # print(model_pat)
+        # print(model_b)
         return model_pat, model_b
 
     def augmentation_warper(self, index, data1):

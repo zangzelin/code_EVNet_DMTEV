@@ -35,6 +35,9 @@ class DigitsDataset(data.Dataset):
         self.graphwithpca = False
 
     def cal_near_index(self, k=10, device="cuda", uselabel=False):
+        
+        os.makedirs("save_near_index", exist_ok=True)
+        
         filename = "save_near_index/data_name{}K{}uselabel{}".format(
             self.data_name, k, uselabel)
         if not os.path.exists(filename):

@@ -62,6 +62,7 @@ class DigitsDataset(data.Dataset):
         else:
             print("load data from ", filename)
             neighbors_index = joblib.load(filename)
+        import pdb; pdb.set_trace()
         self.neighbors_index = tensor(neighbors_index).to(device)
 
     def train_val_split(self, data, label, train, split_int = 4):

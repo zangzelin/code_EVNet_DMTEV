@@ -589,6 +589,7 @@ class LitPatNN(LightningModule):
             train=True,
             datapath=self.hparams.data_path,
         )
+        import pdb; pdb.set_trace()
         self.data_train.cal_near_index(
             device=self.device,
             k=self.hparams.K,

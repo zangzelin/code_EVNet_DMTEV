@@ -248,7 +248,7 @@ class LitPatNN(LightningModule):
         loss_l2 = 0
         if self.current_epoch >= 300 and batch_idx == 0:
             if self.alpha is None:
-                print("--->")
+                # print("--->")
                 self.alpha = loss_topo.detach().item() / (
                     self.Cal_Sparse_loss(
                         self.PM_root.weight.reshape(-1),
@@ -922,31 +922,6 @@ class LitPatNN(LightningModule):
         return fig
 
 
-def plot_cf_figure(cf_origin, img_from_origin, model, pix, text, name=""):
-
-    cf = np.copy(cf_origin)
-    img_from = np.copy(img_from_origin)
-
-    fig_all_img = make_subplots(3, cf.shape[0])
-    for j in range(cf.shape[0]):
-        cf_0 = cf[j]
-        cf_from = img_from[j]
-
-        cf_from[gpu2np(model.mask < 1)] = None
-        cf_0[gpu2np(model.mask < 1)] = None
-
-        fig_all_img.add_trace(go.Heatmap(
-            z=cf_from.reshape(pix, pix)[::-1]), 1, j + 1)
-        fig_all_img.add_trace(
-            go.Heatmap(z=np.abs(cf_from - cf_0).reshape(pix, pix)[::-1]), 2, j + 1
-        )
-        fig_all_img.add_trace(
-            go.Heatmap(z=cf_0.reshape(pix, pix)[::-1]), 3, j + 1)
-
-    log_dict_cf = {
-        "cm/fig_all_img{}_{}".format(text, name): fig_all_img,
-    }
-    wandb.log(log_dict_cf)
 
 
 def main(args):
@@ -958,102 +933,22 @@ def main(args):
 
     wandb.init(
         name=runname,
-        project="PatEmb" + args.project_name,
+        project="EVNet" + args.project_name,
         entity="zangzelin",
         mode="offline" if bool(args.offline) else "online",
         save_code=True,
         config=args,
     )
-    if args.save_checkpoint:
-        checkpoint_callback = pl.callbacks.ModelCheckpoint(
-            dirpath="save_checkpoint/",
-            every_n_epochs=args.log_interval,
-            filename=args.data_name + "{epoch}",
-        )
-        callbacks_list.append(checkpoint_callback)
-    # else:
-    #     checkpoint_callback = None
 
-    model = LitPatNN(
-        dataname=args.data_name,
-        **args.__dict__,
-    )
-    # early_stop = EarlyStopping(
-    #     monitor="es_monitor", patience=1, verbose=False, mode="max"
-    # )
-    # callbacks_list.append(early_stop)
+    model = LitPatNN(dataname=args.data_name,**args.__dict__,)
 
     trainer = Trainer(
         gpus=1,
         max_epochs=args.epochs,
-        # progress_bar_refresh_rate=0,
-        # progress_bar_refresh_rate=10,
-        # callbacks=callbacks_list,
     )
     print("start fit")
     trainer.fit(model)
     print("end fit")
-
-    model.eval()
-
-    model = model.to("cpu")
-    data = torch.tensor(model.data).to("cpu")
-    data = data.reshape(data.shape[0], -1)
-    label = torch.tensor(model.label).to("cpu")
-    mask = model.mask.to("cpu")
-    ins_emb = gpu2np(model.forward_fea(data)[2])
-    index = torch.arange(0, data.shape[0])
-    import numpy as np
-
-    sortx = np.sort(np.copy(ins_emb)[:, 0])
-    blockx0, blockx1 = sortx[10], sortx[-10]
-    blockx0 = blockx0 - 0.2 * (blockx1 - blockx0)
-    blockx1 = blockx1 + 0.2 * (blockx1 - blockx0)
-
-    sorty = np.sort(np.copy(ins_emb)[:, 1])
-    blocky0, blocky1 = sorty[10], sorty[-10]
-    blocky0 = blocky0 - 0.2 * (blocky1 - blocky0)
-    blocky1 = blocky1 + 0.2 * (blocky1 - blocky0)
-
-    a2 = ins_emb[:, 0] > blockx0
-    a1 = ins_emb[:, 0] < blockx1
-    a3 = ins_emb[:, 1] < blocky1
-    a4 = ins_emb[:, 1] > blocky0
-
-    bool_mask = (
-        a1.astype(np.float32)
-        + a2.astype(np.float32)
-        + a3.astype(np.float32)
-        + a4.astype(np.float32)
-    ) == 4
-    data = data[bool_mask]
-    label = label[bool_mask]
-    index = index[bool_mask]
-    ins_emb = ins_emb[bool_mask]
-
-    if args.showmainfig > 0:
-        model.mask = model.mask.to(model.device)
-        model.PM_root = model.PM_root.to(model.device)
-
-        wandb.log({
-                "main/fig": model.up_mainfig(
-                    data, ins_emb, label, index,
-                    mask=mask, explevel=args.explevel
-                )
-            })
-    else:
-        model = model.to("cpu")
-        model.mask = model.mask.to(model.device)
-        model.PM_root = model.PM_root.to(model.device)
-        wandb.log(
-            {
-                "main_easy/fig_easy": model.up_mainfig_emb(
-                    data, ins_emb, label, index, mask=mask
-                )
-            }
-        )
-
-    args.cf_num_data = 10000
 
 
 if __name__ == "__main__":
@@ -1061,15 +956,6 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser(description="*** author")
-    parser.add_argument("--offline", type=int, default=0)
-    parser.add_argument("--seed", type=int, default=1, metavar="S")
-    parser.add_argument("--data_path", type=str, default="/zangzelin/data")
-    parser.add_argument("--log_interval", type=int, default=300)
-    parser.add_argument("--project_name", type=str, default="test")
-    parser.add_argument(
-        "--computer", type=str,
-        default=os.popen("git config user.name").read()[:-1]
-    )
 
     # data set param
     parser.add_argument(
@@ -1122,6 +1008,15 @@ if __name__ == "__main__":
             "PeiHumanTop2",
             "E1",
         ],
+    )
+    parser.add_argument("--offline", type=int, default=0)
+    parser.add_argument("--seed", type=int, default=1, metavar="S")
+    parser.add_argument("--data_path", type=str, default="/zangzelin/data")
+    parser.add_argument("--log_interval", type=int, default=300)
+    parser.add_argument("--project_name", type=str, default="test")
+    parser.add_argument(
+        "--computer", type=str,
+        default=os.popen("git config user.name").read()[:-1]
     )
     parser.add_argument(
         "--n_point",

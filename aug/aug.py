@@ -6,6 +6,8 @@ def aug_near_mix(index, dataset, k=10, random_t=0.1, device="cuda"):
         torch.arange(start=0, end=index.shape[0]) * k
         + torch.randint(low=1, high=k, size=(index.shape[0],))
     ).to(device)
+    
+    import pdb; pdb.set_trace()
     random_select_near_index = (
         dataset.neighbors_index[index][:, :k].reshape((-1,))[r].long()
     )

@@ -7,11 +7,9 @@ import plotly.graph_objects as go
 import pytorch_lightning as pl
 import torch
 from pytorch_lightning import LightningModule, Trainer
-from pytorch_lightning.callbacks.early_stopping import EarlyStopping
 from torch import nn
 from torch.optim.lr_scheduler import StepLR
 from torch.utils.data import DataLoader
-from plotly.subplots import make_subplots
 import scipy
 from torchvision import transforms
 import uuid

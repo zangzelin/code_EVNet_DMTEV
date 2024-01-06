@@ -670,6 +670,7 @@ class LitPatNN(LightningModule):
         return model_pat, model_b
 
     def augmentation(self, index, data1):
+        import pdb; pdb.set_trace()
         data2_list = []
         if self.hparams.Uniform_t > 0:
             data_new = aug_near_mix(

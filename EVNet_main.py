@@ -12,8 +12,6 @@ from torch import nn
 from torch.optim.lr_scheduler import StepLR
 from torch.utils.data import DataLoader
 from plotly.subplots import make_subplots
-import local_exp
-import swich_exp
 import scipy
 from torchvision import transforms
 import uuid

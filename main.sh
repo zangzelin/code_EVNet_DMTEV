@@ -4,5 +4,5 @@ git pull
 wandb login 
 
 
-CUDA_VISIBLE_DEVICES=4 python EVNet_main.py --data_name Digits --num_fea_aim 50
-CUDA_VISIBLE_DEVICES=4 python EVNet_main.py --data_name Mnist --num_fea_aim 400
+CUDA_VISIBLE_DEVICES=4 python EVNet_main.py --data_name Digits --num_fea_aim 64 --nu 5e-3
+CUDA_VISIBLE_DEVICES=4 python EVNet_main.py --data_name Mnist --num_fea_aim 600 --nu 5e-3

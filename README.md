@@ -39,6 +39,7 @@ The datasets include six simple image datasets ([Digits](https://scikit-learn.or
 bash main.sh
 ```
   
+## Cite the paper
 
 ```
 @article{zang2023evnet,

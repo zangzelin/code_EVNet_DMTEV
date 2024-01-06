@@ -1,0 +1,14 @@
+program: /root/project/pat-emb/patemb_case_study_digits.py
+method: grid
+project: PatEmb
+name: patemb_case_study_digits
+metric:
+  goal: maximize
+  name: SVC
+parameters:
+  beta: 
+    values: [0.1, 0.2, 0.4, 0.8]
+  theta: 
+    values: [40, 80, 120, 160, 200, 300]
+
+  

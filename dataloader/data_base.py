@@ -29,7 +29,7 @@ class Cifar10Dataset(DigitsDataset):
                            download=True, transform=None)
 
         # import pdb; pdb.set_trace()
-        data = tensor(D.data)
+        data = tensor(D.data).reshape((50000, -1))
         label = tensor(D.targets).reshape((-1))
 
         self.def_fea_aim = 64

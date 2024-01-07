@@ -10,4 +10,4 @@ wandb login
 # CUDA_VISIBLE_DEVICES=4 python EVNet_main.py --data_name Mnist --num_fea_aim 600 --nu 5e-3 --epochs 900
 
 # for Cifar dataset 
-CUDA_VISIBLE_DEVICES=5 python EVNet_main.py --data_name Cifar10 --num_fea_aim 3100 --nu 5e-3 --epochs 900 --log_interval 10
+CUDA_VISIBLE_DEVICES=5 python EVNet_main.py --data_name Cifar10 --num_fea_aim 3100 --nu 5e-3 --epochs 900 --log_interval 300

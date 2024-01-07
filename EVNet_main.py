@@ -95,8 +95,8 @@ class LitPatNN(LightningModule):
         self.mask = self.PM_root.weight.reshape(-1) > 0.1
         # for i in range(self.hparams.num_pat):
         if self.alpha is not None:
-            print('x.shape', x.shape)
-            print('self.PM_root.weight', self.PM_root.weight.shape)
+            # print('x.shape', x.shape)
+            # print('self.PM_root.weight', self.PM_root.weight.shape)
             lat = x * ((self.PM_root.weight.reshape(-1)) * self.mask)
         else:
             lat = x * ((self.PM_root.weight.reshape(-1)) * self.mask).detach()

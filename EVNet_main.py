@@ -95,6 +95,8 @@ class LitPatNN(LightningModule):
         self.mask = self.PM_root.weight.reshape(-1) > 0.1
         # for i in range(self.hparams.num_pat):
         if self.alpha is not None:
+            print('x.shape', x.shape)
+            print('self.PM_root.weight', self.PM_root.weight.shape)
             lat = x * ((self.PM_root.weight.reshape(-1)) * self.mask)
         else:
             lat = x * ((self.PM_root.weight.reshape(-1)) * self.mask).detach()
@@ -211,7 +213,7 @@ class LitPatNN(LightningModule):
             feature_use_bool = gpu2np(self.mask) > 0
             N_Feature = np.sum(feature_use_bool)
 
-            import pdb; pdb.set_trace()
+            # import pdb; pdb.set_trace()
             if self.alpha is not None and N_Feature <= self.hparams.num_fea_aim:
                 ecb_e_train = ecb.Eval(input=data, latent=ins_emb, label=label, k=10)
                 data_test = self.data_test.data

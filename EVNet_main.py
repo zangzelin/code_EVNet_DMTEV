@@ -89,7 +89,7 @@ class LitPatNN(LightningModule):
 
 
     def forward_fea(self, x):
-        import pdb; pdb.set_trace()
+        # import pdb; pdb.set_trace()
         # lat = torch.zeros(x.shape).to(x.device)
         self.mask = self.PM_root.weight.reshape(-1) > 0.1
         # for i in range(self.hparams.num_pat):

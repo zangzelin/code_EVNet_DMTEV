@@ -210,6 +210,7 @@ class LitPatNN(LightningModule):
             feature_use_bool = gpu2np(self.mask) > 0
             N_Feature = np.sum(feature_use_bool)
 
+            import pdb; pdb.set_trace()
             if self.alpha is not None and N_Feature <= self.hparams.num_fea_aim:
                 ecb_e_train = ecb.Eval(input=data, latent=ins_emb, label=label, k=10)
                 data_test = self.data_test.data

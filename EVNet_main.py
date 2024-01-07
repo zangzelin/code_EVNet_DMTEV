@@ -25,7 +25,7 @@ from aug.aug import aug_near_feautee_change, aug_near_mix, aug_randn
 from dataloader import data_base
 from model.model import NN_FCBNRL_MM
 
-torch.set_num_threads(2)
+# torch.set_num_threads(2)
 
 
 def gpu2np(a):
@@ -149,7 +149,7 @@ class LitPatNN(LightningModule):
         }
 
         loss_l2 = 0
-        if self.current_epoch >= 300 and batch_idx == 0:
+        if self.current_epoch >= self.hparams.log_interval and batch_idx == 0:
             if self.alpha is None:
                 # print("--->")
                 self.alpha = loss_topo.detach().item() / (

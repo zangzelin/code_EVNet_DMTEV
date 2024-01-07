@@ -13,6 +13,7 @@ from torch.utils.data import DataLoader
 import scipy
 from torchvision import transforms
 import uuid
+from functools import reduce
 
 import eval.eval_core as ec
 import eval.eval_core_base as ecb
@@ -64,7 +65,7 @@ class LitPatNN(LightningModule):
             self.hparams.NetworkStructure_2,
         )
         self.hparams.num_fea_aim = min(
-            self.hparams.num_fea_aim, self.data_train.data.shape[1]
+            self.hparams.num_fea_aim, reduce(lambda x, y: x*y, self.data_train.data.shape[1:]) 
         )
 
         self.Loss = dmt_loss_aug.MyLoss(

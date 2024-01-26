@@ -208,7 +208,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--method",
         type=str,
-        default="umap",
+        default="tsne",
         choices=["Pacmap", "umap", "tsne", "pumap", "ivis", "ours"],
     )
     parser.add_argument("--vis_down_sample", type=int, default=200*1000,)

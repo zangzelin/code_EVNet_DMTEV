@@ -593,7 +593,7 @@ if __name__ == "__main__":
         type=int,
         default=1000,
     )
-    parser.add_argument("--epochs", type=int, default=5000)
+    parser.add_argument("--epochs", type=int, default=1500)
     parser.add_argument("--lr", type=float, default=1e-3, metavar="LR")
 
     args = pl.Trainer.add_argparse_args(parser)

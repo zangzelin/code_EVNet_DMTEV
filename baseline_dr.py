@@ -186,6 +186,8 @@ def main(
         ins_emb = ins_emb[:args.vis_down_sample]
         label = label[:args.vis_down_sample]
 
+    label = label.detach().cpu().numpy()
+    data = data.detach().cpu().numpy()
     e_train = ecb.Eval(input=data, latent=ins_emb, label=label, k=10)
     trai_svc = e_train.E_Classifacation_SVC()
     wandb.log({'final_metric/trai_svc': trai_svc})

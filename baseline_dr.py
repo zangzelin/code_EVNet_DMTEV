@@ -1,4 +1,4 @@
-from dataloader import data_DVIT as data_base
+from dataloader import data_base
 import umap
 # from sklearn.manifold import TSNE
 from openTSNE import TSNE

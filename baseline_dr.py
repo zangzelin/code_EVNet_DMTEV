@@ -114,7 +114,7 @@ def main(
     data_train = dataset_f(
         data_name=dataname,
         train=True,
-        preprocess_bool=False,
+        # preprocess_bool=False,
     )
 
     # data = PCA(n_components=300).fit_transform(data_train.data)

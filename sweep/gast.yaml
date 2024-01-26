@@ -1,0 +1,25 @@
+program: EVNet_main.py
+method: grid
+project: diffaug_hyena
+name: baseline
+metric:
+  goal: maximize
+  name: SVC_train
+parameters:
+  num_fea_aim:
+    values: [
+      1200,
+      # 'hyenadna-small-32k-seqlen',
+    ]
+  nu:
+    values: [
+      2e-3, 5e-3, 1e-2, 2e-2, 5e-2, 1e-1, 2e-1, 5e-1, 1
+    ]
+  K:
+    values: [
+      3, 5, 7, 9
+    ]
+  Uniform_t:
+    values: [
+      1.2, 1, 0.5, 
+    ]

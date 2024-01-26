@@ -1,6 +1,6 @@
 program: EVNet_main.py
 method: grid
-project: diffaug_hyena
+project: Evnet_sweep
 name: baseline
 metric:
   goal: maximize

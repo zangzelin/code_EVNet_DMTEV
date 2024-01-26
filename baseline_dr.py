@@ -13,7 +13,7 @@ import pacmap
 import numpy as np
 # from umap.parametric_umap import ParametricUMAP
 from sklearn.preprocessing import MinMaxScaler
-from ivis import Ivis
+# from ivis import Ivis
 # import pytorch_lightning as pl
 # import patemb_main_imagenet
 import uuid

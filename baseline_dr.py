@@ -114,6 +114,7 @@ def main(
     data_train = dataset_f(
         data_name=dataname,
         train=True,
+        datapath=data_path,
         # preprocess_bool=False,
     )
 

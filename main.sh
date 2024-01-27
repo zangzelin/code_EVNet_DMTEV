@@ -8,7 +8,7 @@ wandb login
 
 # for Mnist dataset 
 # CUDA_VISIBLE_DEVICES=5 python EVNet_main.py --data_name Mnist --num_fea_aim 600 --nu 5e-3 --epochs 900
-CUDA_VISIBLE_DEVICES=5 python EVNet_main.py --data_name Gast10k1457 --num_fea_aim 1200 --nu 5e-3 --epochs 900 --K 3
+# CUDA_VISIBLE_DEVICES=5 python EVNet_main.py --data_name Gast10k1457 --num_fea_aim 1200 --nu 5e-3 --epochs 1200 --K 3
 
 # for Cifar dataset 
 # CUDA_VISIBLE_DEVICES=5 python EVNet_main.py --data_name Cifar10 --num_fea_aim 3100 --nu 5e-3 --epochs 900 --log_interval 300

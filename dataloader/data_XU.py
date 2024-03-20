@@ -28,7 +28,12 @@ class CSVDataset(DigitsDataset):
             label = np.read_csv(datapath+'/label.csv')
         else:
             label = np.zeros(data.shape[0])
-            
+        
+        try:
+            os.remove('save_near_index/data_nameCSVK5uselabelFalse')
+        except:
+            pass
+        
         data = tensor(data).float()
         label = tensor(label).long()
         

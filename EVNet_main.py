@@ -26,7 +26,7 @@ from aug.aug import aug_near_feautee_change, aug_near_mix, aug_randn
 from dataloader import data_base
 from model.model import NN_FCBNRL_MM
 
-# torch.set_num_threads(2)
+torch.set_num_threads(2)
 
 
 def gpu2np(a):

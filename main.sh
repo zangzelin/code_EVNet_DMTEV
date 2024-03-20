@@ -12,3 +12,6 @@ wandb login
 
 # for Cifar dataset 
 # CUDA_VISIBLE_DEVICES=5 python EVNet_main.py --data_name Cifar10 --num_fea_aim 3100 --nu 5e-3 --epochs 900 --log_interval 300
+
+# if you dont want to use gpu, you can use CUDA_VISIBLE_DEVICES=-1
+# CUDA_VISIBLE_DEVICES=-1 python EVNet_main.py --data_name Digits --num_fea_aim 64 --nu 5e-3 --epochs 900

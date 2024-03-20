@@ -494,8 +494,9 @@ if __name__ == "__main__":
     parser.add_argument(
         "--data_name",
         type=str,
-        default="Gast10k1457",
+        default="CSV",
         choices=[
+            "CSV",
             "InsEmb_PBMC",
             "OTU",
             "Activity",
@@ -544,7 +545,7 @@ if __name__ == "__main__":
     )
     parser.add_argument("--offline", type=int, default=0)
     parser.add_argument("--seed", type=int, default=1, metavar="S")
-    parser.add_argument("--data_path", type=str, default="/zangzelin/data")
+    parser.add_argument("--data_path", type=str, default="data/niu")
     parser.add_argument("--log_interval", type=int, default=300)
     parser.add_argument("--project_name", type=str, default="test")
     parser.add_argument(

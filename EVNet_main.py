@@ -299,14 +299,14 @@ class LitPatNN(LightningModule):
                 k=self.hparams.K,
                 uselabel=bool(self.hparams.uselabel),
             )
-        self.data_train.to_device('cpu')
+        self.data_train.to_device(self.my_device)
 
         self.data_test = dataset_f(
             data_name=self.hparams.data_name,
             train=False,
             datapath=self.hparams.data_path,
         )
-        self.data_test.to_device('cpu')
+        self.data_test.to_device(self.my_device)
 
         self.dims = self.data_train.get_dim()
 
@@ -476,7 +476,7 @@ def main(args):
     model = LitPatNN(dataname=args.data_name,**args.__dict__,)
 
     trainer = Trainer(
-        gpus=1,
+        gpus=1 if torch.cuda.is_available() else 0,
         max_epochs=args.epochs,
     )
     print("start fit")

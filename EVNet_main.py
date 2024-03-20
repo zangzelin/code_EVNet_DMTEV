@@ -55,7 +55,8 @@ class LitPatNN(LightningModule):
         self.setup()
         self.wandb_logs = {}
         self.mse = torch.nn.CrossEntropyLoss()
-        # self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        
+        self.my_device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
         self.hparams.num_pat = min(self.data_train.data.shape[1], self.hparams.num_pat)
 
@@ -294,18 +295,18 @@ class LitPatNN(LightningModule):
         )
         if len(self.data_train.data.shape) == 2:
             self.data_train.cal_near_index(
-                device='cuda',
+                device=self.my_device,
                 k=self.hparams.K,
                 uselabel=bool(self.hparams.uselabel),
             )
-        self.data_train.to_device("cuda")
+        self.data_train.to(self.my_device)
 
         self.data_test = dataset_f(
             data_name=self.hparams.data_name,
             train=False,
             datapath=self.hparams.data_path,
         )
-        self.data_test.to_device("cuda")
+        self.data_test.to(self.my_device)
 
         self.dims = self.data_train.get_dim()
 

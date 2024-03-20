@@ -42,6 +42,7 @@ class LitPatNN(LightningModule):
         super().__init__()
 
         # Set our init args as class attributes
+        self.my_device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.dataname = dataname
         # self.learning_rate = learning_rate
         self.save_hyperparameters()
@@ -56,7 +57,6 @@ class LitPatNN(LightningModule):
         self.wandb_logs = {}
         self.mse = torch.nn.CrossEntropyLoss()
         
-        self.my_device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
         self.hparams.num_pat = min(self.data_train.data.shape[1], self.hparams.num_pat)
 

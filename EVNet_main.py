@@ -454,6 +454,10 @@ class LitPatNN(LightningModule):
         fig = px.scatter(
             x=ins_emb[:, 0], y=ins_emb[:, 1], color=[str(c) for c in color]
         )
+        
+        fig.to_image(format="png", engine="kaleido")
+        np.save("save_emb/" + self.hparams.data_name + "={}".format(self.current_epoch), ins_emb)
+        
         return fig
 
 

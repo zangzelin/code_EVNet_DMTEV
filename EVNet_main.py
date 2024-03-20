@@ -299,14 +299,14 @@ class LitPatNN(LightningModule):
                 k=self.hparams.K,
                 uselabel=bool(self.hparams.uselabel),
             )
-        self.data_train.to(self.my_device)
+        self.data_train.to_device('cpu')
 
         self.data_test = dataset_f(
             data_name=self.hparams.data_name,
             train=False,
             datapath=self.hparams.data_path,
         )
-        self.data_test.to(self.my_device)
+        self.data_test.to_device('cpu')
 
         self.dims = self.data_train.get_dim()
 

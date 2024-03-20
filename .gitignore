@@ -20,3 +20,4 @@ save_html/*
 save_checkpoint/*
 save_checkpoint_use/*
 tensorflow/*
+data/*

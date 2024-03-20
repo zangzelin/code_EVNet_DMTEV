@@ -38,7 +38,15 @@ The datasets include six simple image datasets ([Digits](https://scikit-learn.or
 ``` bash
 bash main.sh
 ```
-  
+
+## 
+If you want to use your own dataset, you can use the following command:
+``` bash
+CUDA_VISIBLE_DEVICES=-1 python EVNet_main.py --data_name CSV --num_fea_aim 64 --nu 5e-3 --epochs 90 --data_path=data/niu/
+```
+
+If you use 'data/niu/'. The data file should named as data/niu/data.csv, the label file file should named as data/niu/label.csv.
+
 ## Cite the paper
 
 ```

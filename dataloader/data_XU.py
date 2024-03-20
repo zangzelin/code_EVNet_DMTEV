@@ -23,15 +23,18 @@ class CSVDataset(DigitsDataset):
     def __init__(self, data_name="Xu_Gut", train=True, datapath="~/data"):
         # digit = load_digits()
         self.data_name = data_name
-        data = np.read_csv(datapath+'/data.csv')
+        data = pd.read_csv(datapath+'/data.csv', header=None).to_numpy().astype(np.float32)
         if os.path.exists(datapath+'/label.csv'):
             label = np.read_csv(datapath+'/label.csv')
         else:
             label = np.zeros(data.shape[0])
+            
+        data = tensor(data).float()
+        label = tensor(label).long()
         
         self.def_fea_aim = 64
         self.train_val_split(data, label, train)
-        self.graphwithpca = True
+        self.graphwithpca = False
 
 
 class Xu_GutDataset(DigitsDataset):

@@ -216,7 +216,10 @@ class LitPatNN(LightningModule):
             N_Feature = np.sum(feature_use_bool)
 
             # import pdb; pdb.set_trace()
-            if self.alpha is not None and N_Feature <= self.hparams.num_fea_aim:
+            
+            have_the_label_info = (label.max() != label.min())
+            
+            if self.alpha is not None and N_Feature <= self.hparams.num_fea_aim and have_the_label_info:
                 ecb_e_train = ecb.Eval(input=data, latent=ins_emb, label=label, k=10)
                 data_test = self.data_test.data
                 label_test = self.data_test.label
@@ -236,9 +239,7 @@ class LitPatNN(LightningModule):
                         "metric/#Feature": N_Feature,
                         "SVC_train": ecb_e_train.E_Classifacation_SVC(),  # SVC= ecb_e.E_Classifacation_SVC(),
                         "SVC_test": ecb_e_test.E_Classifacation_SVC(),  # SVC= ecb_e.E_Classifacation_SVC(),
-                        "main_easy/fig_easy": self.up_mainfig_emb(
-                            data, ins_emb, label, index, mask=gpu2np(self.mask)
-                        )
+                        "main_easy/fig_easy": self.up_mainfig_emb(data, ins_emb, label, index, mask=gpu2np(self.mask))
                     }
                 )
 
@@ -250,6 +251,7 @@ class LitPatNN(LightningModule):
                         "alpha": self.alpha,
                         "metric/#link": N_link,
                         "metric/#Feature": N_Feature,
+                        "main_easy/fig_easy": self.up_mainfig_emb(data, ins_emb, label, index, mask=gpu2np(self.mask))
                     }
                 )
 

@@ -21,3 +21,4 @@ save_checkpoint/*
 save_checkpoint_use/*
 tensorflow/*
 data/*
+data/niu/data.csv

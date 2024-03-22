@@ -305,7 +305,7 @@ class LitPatNN(LightningModule):
 
         self.data_test = dataset_f(
             data_name=self.hparams.data_name,
-            train=False,
+            train=True,
             datapath=self.hparams.data_path,
         )
         self.data_test.to_device(self.my_device)

@@ -38,7 +38,7 @@ class CSVDataset(DigitsDataset):
         label = tensor(label).long()
         
         self.def_fea_aim = 64
-        self.train_val_split(data, label, train)
+        self.train_val_split(data, label, train, split_int=5)
         self.graphwithpca = False
 
 
